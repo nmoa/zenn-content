@@ -116,13 +116,29 @@ dockerイメージのpull時、イメージのビルド時、コンテナの実�
 
 ### pull時
 
-`/etc/systemd/system/docker.service.d/http-proxy.conf`を作成し、プロキシ設定を記述する。
+まずは`/etc/systemd/system/docker.service.d/http-proxy.conf`を作成する。
+
+```bash
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
+```
+
+`http-proxy.conf`にプロキシ設定を記述する。
 
 ```bash:/etc/systemd/system/docker.service.d/http-proxy.conf
 [Service]
 Environment="http_proxy=http://proxy.example.com:8080"
 Environment="https_proxy=http://proxy.example.com:8080"
 ```
+
+設定ファイルを作成したら、以下のコマンドで設定を反映させる。
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+参考 : [Configure the daemon with systemd | Docker Docs](https://docs.docker.com/config/daemon/systemd/#httphttps-proxy)
 
 ### イメージのビルド時
 
