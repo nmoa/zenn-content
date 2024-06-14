@@ -19,7 +19,7 @@ published: true
 ARM社製の、ARMプロセッサ向けC/C++コンパイラ。
 
 少し古めのArm Compiler 5や更に古いRVCT(RealView Compilation Tools)で使用するコンパイラがこれ。  
-現行バージョン(2024年現在)のArm Compiler 6はLLVMベースの`armclang`というコンパイラが使われている。
+現行バージョン(2024年現在)のArm Compiler 6はLLVMベースの`armclang`というコンパイラが使われており、こちらは本記事の対象外。
 
 ## コンパイルオプションの設定
 
@@ -52,25 +52,25 @@ armcc --multibyte_chars --locale=ja_JP.sjis --message_locale=ja_JP.utf8 -c main.
 
 1. 必要なパッケージをインストールする。
 
-    ```bash
+    ```
     # apt install locales language-pack-ja -y
     ```
 
 1. システムのロケール設定ファイルに日本語のShift-JISを追加する。
 
-    ```bash
+    ```
     # echo "ja_JP.SJIS SHIFT_JIS" >> /etc/locale.gen
     ```
 
 1. ロケールを再生成する。
 
-    ```bash
+    ```
     # locale-gen
     ```
 
 1. `ja_JP.SJIS`が追加されたことを確認する。
 
-    ```bash
+    ```
     $ locale -a
     C
     C.utf8
