@@ -12,11 +12,12 @@ published: true
 
 ## プロキシ設定
 
-環境変数`http_proxy`、`https_proxy`にサーバURLを設定する。
+`~/.profile`や`~/.bash_profile`などで、環境変数`http_proxy`, `https_proxy`, `no_proxy`にサーバURLを設定する。
 
 ```bash:~/.profile
 export http_proxy=http://proxy.example.com:8080
 export https_proxy=http://proxy.example.com:8080
+export no_proxy=localhost,127.0.0.1,::1
 ```
 
 ### 接続確認
@@ -50,7 +51,7 @@ export https_proxy=http://proxy.example.com:8080
 
 ## `sudo`
 
-`sudo`コマンドには環境変数が引き継がれずプロキシ設定が効かないため、`http_proxy`, `https_proxy`が引き継がれるように設定を行う。
+`sudo`コマンドには環境変数が引き継がれずプロキシ設定が効かないため、`http_proxy`, `https_proxy`, `no_proxy`が引き継がれるように設定を行う。
 
 以下のコマンドで`/etc/sudoers`を編集し、
 
@@ -61,7 +62,7 @@ sudo visudo
 末尾に下記の設定を追加する。
 
 ```bash:/etc/sudoers
-Defaults env_keep += "http_proxy https_proxy"
+Defaults env_keep += "http_proxy https_proxy no_proxy"
 ```
 
 Ubuntuの場合、デフォルトで以下のように設定がコメントアウトされているので、コメントアウトを解除しても良い。
@@ -83,12 +84,17 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
 
 ## GitHubへのSSH接続をプロキシ経由で行う
 
-プロキシを設定したらGitHubからのHTTPSでのクローンは特別な設定なしに行えるようになるが、`public`でないリポジトリからのクローンはPersonal Access Tokenを使用する必要があり面倒なので、SSHで接続できるようにする。
+プロキシを設定したらGitHubからのHTTPSでのアクセスは行えるようになるが、`public`でないリポジトリにHTTPSでアクセスするためにはPersonal Access Tokenを使用する必要があり面倒。そのため、SSHで接続できるようにする。
 
-1. `corkscrew`をインストールする。`corkscrew`はSSH接続をHTTPプロキシでトンネリングするツール。
+1. `nc`が使えることを確認する。
 
     ```bash
-    sudo apt install corkscrew
+    $ nc
+    usage: nc [-46CDdFhklNnrStUuvZz] [-I length] [-i interval] [-M ttl]
+              [-m minttl] [-O length] [-P proxy_username] [-p source_port]
+              [-q seconds] [-s sourceaddr] [-T keyword] [-V rtable] [-W recvlimit]
+              [-w timeout] [-X proxy_protocol] [-x proxy_address[:port]]
+              [destination] [port]
     ```
 
 1. `~/.ssh/config`に以下の設定を追加する。
@@ -98,7 +104,7 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
       User git
       Hostname ssh.github.com
       Port 443
-      ProxyCommand corkscrew proxy.example.com 8080 ssh.github.com 443
+      ProxyCommand nc -X connect -x proxy.example.com:8080 %h %p
     ```
 
 1. GitHubにSSH接続する。
@@ -107,8 +113,6 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
     $ ssh -T git@github.com
     Hi xxxx! You've successfully authenticated, but GitHub does not provide shell access.
     ```
-
-参考 : [Proxy下でSSHを使いたい!!! #Linux - Qiita](https://qiita.com/isso0424/items/e54e528e90950b5f0c38)
 
 ## docker
 
