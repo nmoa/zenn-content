@@ -84,9 +84,11 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
 
 ## GitHubへのSSH接続をプロキシ経由で行う
 
-プロキシを設定したらGitHubからのHTTPSでのアクセスは行えるようになるが、`public`でないリポジトリにHTTPSでアクセスするためにはPersonal Access Tokenを使用する必要があり面倒。そのため、SSHで接続できるようにする。
+プロキシを設定したらGitHubからのHTTPSでのアクセスは行えるようになるが、`public`でないリポジトリにHTTPSでアクセスするためにはPersonal Access Tokenを使用する必要があり面倒。そのため、SSHで接続できるようにする。プロキシを使うためのコマンドはいくつかあり、それぞれで設定方法が異なる。
 
-1. `nc`が使えることを確認する。
+### `nc`を使用する場合
+
+1. コマンドがあることを確認する。
 
     ```bash
     $ nc
@@ -107,18 +109,61 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
       ProxyCommand nc -X connect -x proxy.example.com:8080 %h %p
     ```
 
-1. GitHubにSSH接続する。
+### `ncat`を使用する場合
+
+1. コマンドがあることを確認する。
 
     ```bash
-    $ ssh -T git@github.com
-    Hi xxxx! You've successfully authenticated, but GitHub does not provide shell access.
+    $ ncat --help
+    Ncat 7.94SVN ( https://nmap.org/ncat )
+    Usage: ncat [options] [hostname] [port]
     ```
+
+1. `~/.ssh/config`に以下の設定を追加する。
+
+    ```bash:~/.ssh/config
+    Host github.com
+      User git
+      Hostname ssh.github.com
+      Port 443
+      ProxyCommand ncat --proxy proxy.example.com:8080 --proxy-type http %h %p
+    ```
+
+### `corkscrew`を使用する場合
+
+1. コマンドがあることを確認する。
+
+    ```bash
+    $ corkscrew
+    corkscrew 2.0
+
+    usage: corkscrew <proxyhost> <proxyport> <desthost> <destport> [authfile]
+    ```
+
+1. `~/.ssh/config`に以下の設定を追加する。
+
+    ```bash:~/.ssh/config
+    Host github.com
+      User git
+      Hostname ssh.github.com
+      Port 443
+      ProxyCommand corkscrew proxy.example.com 8080 %h %p
+    ```
+
+### 接続確認
+
+```bash
+$ ssh -T git@github.com
+Hi xxxx! You've successfully authenticated, but GitHub does not provide shell access.
+```
 
 ## docker
 
 dockerイメージのpull時、イメージのビルド時、コンテナの実行時でそれぞれプロキシ設定が必要。
 
-### pull時
+### イメージのpull時
+
+Docker daemonにプロキシ設定を記述する必要がある。
 
 まずは`/etc/systemd/system/docker.service.d/http-proxy.conf`を作成する。
 
@@ -133,6 +178,7 @@ sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
 [Service]
 Environment="http_proxy=http://proxy.example.com:8080"
 Environment="https_proxy=http://proxy.example.com:8080"
+Environment="no_proxy=localhost,127.0.0.1,::1"
 ```
 
 設定ファイルを作成したら、以下のコマンドで設定を反映させる。
@@ -152,6 +198,7 @@ sudo systemctl restart docker
 docker build \
   --build-arg http_proxy=http://proxy.example.com:8080 \
   --build-arg https_proxy=http://proxy.example.com:8080 \
+  --build-arg no_proxy=localhost,127.0.0.1,::1 \
   -t my-image .
 ```
 
@@ -162,7 +209,7 @@ docker build \
 `docker run`コマンドを実行する際に`-e`オプションを使用してプロキシ設定を渡す。
 
 ```bash
-docker run -e http_proxy=http://proxy.example.com:8080 -e https_proxy=http://proxy.example.com:8080 my-image
+docker run -e http_proxy=http://proxy.example.com:8080 -e https_proxy=http://proxy.example.com:8080 -e no_proxy=localhost,127.0.0.1,::1 my-image
 ```
 
 `~/.docker/config.json`にプロキシ設定を記述する方法もあるが、[Docker のプロキシ設定は割と地獄](https://zenn.dev/wsuzume/articles/f9935b47ce0b55)の記事にもあるようにすべてのコンテナ実行に共有されてしまうこと、`sudo`のときは設定ファイルが違うことを考えると、実行時にオプションとして渡したほうがスッキリしそう。
