@@ -12,7 +12,8 @@ published: true
 
 ## プロキシ設定
 
-`~/.profile`や`~/.bash_profile`などで、環境変数`http_proxy`, `https_proxy`, `no_proxy`にサーバURLを設定する。
+`~/.profile`や`~/.bash_profile`などで、環境変数`http_proxy`, `https_proxy`にサーバURLを設定する。
+プロキシを経由してほしくないホストは`no_proxy`にカンマ区切りで指定する。
 
 ```bash:~/.profile
 export http_proxy=http://proxy.example.com:8080
@@ -84,7 +85,8 @@ Acquire::https::Proxy "http://proxy.example.com:8080";
 
 ## GitHubへのSSH接続をプロキシ経由で行う
 
-プロキシを設定したらGitHubからのHTTPSでのアクセスは行えるようになるが、`public`でないリポジトリにHTTPSでアクセスするためにはPersonal Access Tokenを使用する必要があり面倒。そのため、SSHで接続できるようにする。プロキシを使うためのコマンドはいくつかあり、それぞれで設定方法が異なる。
+プロキシを設定したらGitHubからのHTTPSでのアクセスは行えるようになるが、`public`でないリポジトリにHTTPSでアクセスするためにはPersonal Access Tokenを使用する必要があり面倒。そのため、SSHで接続できるようにする。
+プロキシを使うためのコマンドはいくつかあり、それぞれで設定方法が異なる。
 
 ### `nc`を使用する場合
 
