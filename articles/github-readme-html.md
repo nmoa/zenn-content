@@ -8,7 +8,7 @@ published: true
 
 ## 概要
 
-社内向けのツールをGitHubで開発した際、README.mdにマニュアルを書いていました。しかし、GitHubのアカウントを持っていない人にもマニュアルを配布しやすくするため、README.mdをイイ感じの見た目のHTMLに変換してリポジトリにプッシュすることにしました。
+社内向けのツールをGitHubで開発した際にREADME.mdにマニュアルを書いていたのですが、GitHubのアカウントを持っていない人にもマニュアルを配布しやすくするため、README.mdをイイ感じの見た目のHTMLに変換してリポジトリにプッシュすることにしました。
 
 この記事では、その方法についてまとめます。
 
@@ -23,13 +23,19 @@ published: true
 
 ## 結果
 
-以下の手順で実現しました：
+先に結果を示すと、つぎのような見た目のHTMLが生成されるようになります：
 
-1. [jaywcjlove/markdown-to-html-cli](https://github.com/jaywcjlove/markdown-to-html-cli/)を使用してREADME.mdをHTMLに変換する
-2. [peter-evans/create-pull-request](https://github.com/peter-evans/create-pull-request)を使用して作成したHTMLをプッシュし、プルリクエストを作成する
+![](/images/readme-html-example.png)
+
+（これは[nmoa/markdown-html-example](https://github.com/nmoa/markdown-html-example)のREADME.mdを変換したものです）
+
+実現した手順は以下のとおりです：
+
+1. [markdown-to-html-cli](https://github.com/jaywcjlove/markdown-to-html-cli/)を使用してREADME.mdをHTMLに変換する
+2. [create-pull-request](https://github.com/peter-evans/create-pull-request)を使用して作成したHTMLをプッシュし、プルリクエストを作成する
 3. GitHub CLIの`gh pr merge`コマンドでプルリクを自動マージする
 
-実際のGitHub Actionsの`.yml`ファイルは以下のようになりました：
+実際のGitHub Actionsの`.yml`ファイルは以下のようになりました。
 
 ```yaml
 name: Generate README.html
@@ -84,8 +90,8 @@ jobs:
 
 ### トリガー
 
-`on: push: branches: master`だけだとプルリクの自動マージによって再度ワークフローが実行されて無限ループになる可能性があったため、`paths: README.md`を指定しています。  
-ただし、[こちらの情報](https://github.com/ad-m/github-push-action/issues/32)によると`GITHUB_TOKEN`を使用したイベントはトリガーの対象にならないようなので、`paths: README.md`は不要かもしれません。
+`on: push: branches: master`だけだとプルリクの自動マージによって再度ワークフローが実行されて無限ループになるのが怖かったのと、無駄にActionsを走らせないようにするために、`paths: README.md`を指定しています。  
+ただし、[こちらの情報](https://github.com/ad-m/github-push-action/issues/32)によると`GITHUB_TOKEN`を使用したイベントはトリガーの対象にならないようなので、無限ループは起こらなさそうです。
 
 ### Markdown→HTML変換
 
@@ -100,16 +106,20 @@ jobs:
 
 #### pandocを使用していない理由
 
-MarkdownからHTMLに変換するツールとしては`pandoc`も有名です。また、GitHubのスタイルを実現するカスタムCSSとして[github-markdown-css](https://github.com/sindresorhus/github-markdown-css)もあり、以下のようなコマンドでスタンドアロンなHTMLを生成できるため、最初はこれを検討していました：
+MarkdownからHTMLに変換するツールとしては`pandoc`も有名です。また、GitHubのスタイルを実現するカスタムCSSとして[github-markdown-css](https://github.com/sindresorhus/github-markdown-css)もあり、以下のようなコマンドでスタンドアロンなHTMLを生成できるため、最初はこれを検討していました。
 
 ```bash
 pandoc -f gfm -t html5 --embed-resources --standalone -c https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.6.1/github-markdown.css README.md -o README.html
 ```
 
-しかし、私の環境では以下の問題がありました：
+しかし、以下の問題がありました：
 
 - シンタックスハイライト以外のスタイルが適用されない
 - 箇条書きの内部に作成したテーブルが正しくレンダリングされない
+
+具体的には、以下のような見た目のHTMLとなってしまいました。
+
+![](/images/readme-html-pandoc.png)
 
 これらの理由から、`markdown-to-html-cli`を使用することにしました。
 
@@ -130,4 +140,5 @@ GitHub ActionsのワークフローではデフォルトでGitHub CLIが使用�
 
 GitHubのREADME.mdをイイ感じにHTMLに変換してプッシュする方法についてまとめました。
 
-様々な実現方法があると思いますが、意外とこの手順を紹介している記事は見つからなかったため、同じようなことを実現したい方の参考になれば幸いです。
+様々な実現方法があると思いますが、意外とこの手順を紹介している記事は見つからなかったため、同じようなことを実現したい方の参考になれば幸いです。  
+[nmoa/markdown-html-example](https://github.com/nmoa/markdown-html-example)のリポジトリも参考にしてみてください。
