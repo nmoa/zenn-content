@@ -24,7 +24,7 @@ GitHub Copilot Agentにファイルの読み書きが必要な指示をすると
 
 ![](/images/github-copilot-agent.png)
 
-VSCodeの出力ログでGitHub Copilot Chatのログを確認すると、以下のようなエラーが出力されており、WSLのはずなのにパスの区切りをバックスラッシュ'\'にしようとしていることが分かります。
+VSCodeの出力ログでGitHub Copilot Chatのログを確認すると、以下のようなエラーが出力されており、WSLのはずなのにパスの区切りをバックスラッシュ`\`にしようとしていることが分かります。
 
 ```
 2025-07-17 08:47:46.602 [error] Error from tool list_dir with args {"path":"\\home\\[省略]\\code\\cpp-sandbox"}: Directory \home\[省略]\code\cpp-sandbox is outside of the workspace and can't be read: Error: Directory \home\[省略]\code\cpp-sandbox is outside of the workspace and can't be read
