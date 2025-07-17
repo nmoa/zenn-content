@@ -22,7 +22,7 @@ VSCodeをWSLに接続し、GitHub Copilot Agentを利用した際に「パスの
 
 GitHub Copilot Agentにファイルの読み書きが必要な指示をすると、「ファイルが読み取れない」などのエラーが返され、作業が進まない場合があります。（「パスの問題がある」というメッセージが表示されることもありますが、今回は再現できませんでした）
 
-![](../images/github-copilot-agent.png)
+![](/images/github-copilot-agent.png)
 
 VSCodeの出力ログでGitHub Copilot Chatのログを確認すると、以下のようなエラーが出力されていました。
 
@@ -51,7 +51,7 @@ VSCodeの出力ログでGitHub Copilot Chatのログを確認すると、以下�
 
 VSCodeをリモート（WSL）に接続して使用する場合、拡張機能は「リモート（WSL）側」と「Windows側」に分かれてインストールされます。通常、GitHubやGitHub Copilotの拡張機能は「リモート（WSL）側」にインストールされますが、上記設定をしていると「Windows側」にインストールされます。
 
-![](../images/extension.png)
+![](/images/extension.png)
 
 ↑この画面ではGitHub Copilot Chatが「Windows側」にインストールされています。
 
